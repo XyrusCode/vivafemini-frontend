@@ -1,18 +1,19 @@
+import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState, type JSX } from 'react';
 
-import { createFileRoute } from '@tanstack/react-router';
 
 import { PeriodLengthChart } from '#/components/health-report/PeriodLengthChart';
 import { SymptomDonut } from '#/components/health-report/SymptomDonut';
 import { Card } from '#/components/ui/Card';
 import { healthReportsService } from '#/services/health-reports.service';
+import { formatDate } from '#/utils/date';
+
 import type {
   HealthReport,
   HistoricalEntry,
   PeriodLengthPoint,
   SymptomFrequency,
 } from '#/types';
-import { formatDate } from '#/utils/date';
 
 export const Route = createFileRoute('/health-report')({ component: HealthReportPage });
 
@@ -21,11 +22,15 @@ function HealthReportPage(): JSX.Element {
   const [trends, setTrends] = useState<PeriodLengthPoint[]>([]);
   const [symptoms, setSymptoms] = useState<SymptomFrequency[]>([]);
   const [history, setHistory] = useState<HistoricalEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // Start loading only if a token exists; avoids synchronous setState in the effect
+  const [isLoading, setIsLoading] = useState(() => !!localStorage.getItem('access_token'));
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
-    Promise.all([
+    if (!localStorage.getItem('access_token')) {
+      return;
+    }
+    void Promise.all([
       healthReportsService.latest().catch(() => null),
       healthReportsService.cycleTrends().catch(() => []),
       healthReportsService.symptomFrequency().catch(() => []),
@@ -85,7 +90,7 @@ function HealthReportPage(): JSX.Element {
           <Card title="Cycle Summary">
             <dl className="space-y-3">
               {[
-                ['Avg Cycle Length', `${report.averageCycleLength} days`],
+                ['Avg Cycle Length', `${String(report.averageCycleLength)} days`],
                 ['Most frequent symptom', report.mostFrequentSymptom ?? '—'],
               ].map(([label, value]) => (
                 <div key={label} className="flex items-center justify-between">
@@ -121,11 +126,11 @@ function HealthReportPage(): JSX.Element {
                   <div className="flex-1 rounded-full bg-[var(--line)] h-2">
                     <div
                       className="h-2 rounded-full bg-pink-400 transition-all"
-                      style={{ width: `${s.percentage}%` }}
+                      style={{ width: `${String(s.percentage)}%` }}
                     />
                   </div>
                   <span className="w-10 text-right text-xs text-[var(--sea-ink-soft)]">
-                    {s.percentage}%
+                    {String(s.percentage)}%
                   </span>
                 </div>
               ))}

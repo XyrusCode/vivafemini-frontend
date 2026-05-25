@@ -1,5 +1,7 @@
 import { Link } from '@tanstack/react-router';
 
+import { useAuthContext } from '#/context/AuthContext';
+
 import ThemeToggle from './ThemeToggle';
 
 const NAV_ITEMS = [
@@ -9,6 +11,8 @@ const NAV_ITEMS = [
 ] as const;
 
 export default function Header() {
+  const { isAuthenticated, isLoading, user, logout, openAuthModal } = useAuthContext();
+
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--header-bg)] px-4 backdrop-blur-lg">
       <nav className="page-wrap flex flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-4">
@@ -40,6 +44,30 @@ export default function Header() {
         {/* Right side */}
         <div className="ml-auto flex items-center gap-2">
           <ThemeToggle />
+
+          {/* Auth controls */}
+          {!isLoading && (
+            isAuthenticated ? (
+              <div className="flex items-center gap-2">
+                <span className="hidden max-w-[120px] truncate text-xs font-semibold text-[var(--sea-ink-soft)] sm:block">
+                  {user?.fullName}
+                </span>
+                <button
+                  onClick={logout}
+                  className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--sea-ink)] transition hover:bg-[var(--link-bg-hover)]"
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={openAuthModal}
+                className="rounded-full bg-pink-500 px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-pink-600"
+              >
+                Sign in
+              </button>
+            )
+          )}
         </div>
       </nav>
     </header>

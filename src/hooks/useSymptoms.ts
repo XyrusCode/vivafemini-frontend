@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { symptomsService } from '#/services/symptoms.service';
+
 import type { Symptom, SymptomCategory } from '#/types';
 
 const CATEGORY_LABELS: Record<SymptomCategory, string> = {
@@ -13,24 +14,28 @@ const CATEGORY_LABELS: Record<SymptomCategory, string> = {
 
 export function useSymptoms() {
   const [symptoms, setSymptoms] = useState<Symptom[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // Start loading only if a token already exists; avoids synchronous setState in the effect
+  const [isLoading, setIsLoading] = useState(() => !!localStorage.getItem('access_token'));
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!localStorage.getItem('access_token')) {
+      return;
+    }
     symptomsService
       .list()
       .then(setSymptoms)
       .catch((err: unknown) => {
         setError(err instanceof Error ? err.message : 'Failed to load symptoms');
       })
-      .finally(() => setIsLoading(false));
+      .finally(() => { setIsLoading(false); });
   }, []);
 
   const grouped = symptoms.reduce<Partial<Record<SymptomCategory, Symptom[]>>>(
     (acc, symptom) => {
       const cat = symptom.category;
-      if (!acc[cat]) acc[cat] = [];
-      acc[cat]!.push(symptom);
+      acc[cat] ??= [];
+      acc[cat].push(symptom);
       return acc;
     },
     {},
