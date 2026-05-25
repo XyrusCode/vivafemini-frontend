@@ -6,15 +6,16 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['dist', '.output', 'node_modules', '**/*.gen.ts'] },
+  { ignores: ['dist', '.vercel', '.output', 'node_modules', '**/*.gen.ts'] },
 
   // Base JS recommended
   js.configs.recommended,
 
-  // TypeScript recommended (strict)
+  // TypeScript recommended (strict) + type-checked rules
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
 
+  // ── TypeScript + import ordering — all .ts / .tsx files ──────────────────
   {
     languageOptions: {
       globals: { ...globals.browser },
@@ -26,18 +27,10 @@ export default tseslint.config(
 
     plugins: {
       import: importPlugin,
-      react: reactPlugin,
-      'react-hooks': reactHooks,
     },
 
     rules: {
-      // ── React ─────────────────────────────────────────────────────────────
-      ...reactPlugin.configs.recommended.rules,
-      ...reactHooks.configs.recommended.rules,
-      'react/react-in-jsx-scope': 'off', // React 17+ JSX transform
-      'react/prop-types': 'off',         // TypeScript handles this
-
-      // ── Import ordering ───────────────────────────────────────────────────
+      // ── Import ordering ─────────────────────────────────────────────────
       'import/order': [
         'error',
         {
@@ -59,7 +52,7 @@ export default tseslint.config(
       'import/no-duplicates': 'error',
       'import/no-cycle': 'warn',
 
-      // ── TypeScript ────────────────────────────────────────────────────────
+      // ── TypeScript ───────────────────────────────────────────────────────
       '@typescript-eslint/consistent-type-imports': [
         'error',
         { fixStyle: 'inline-type-imports', prefer: 'type-imports' },
@@ -76,8 +69,29 @@ export default tseslint.config(
     },
 
     settings: {
-      react: { version: 'detect' },
       'import/resolver': { typescript: true },
+    },
+  },
+
+  // ── React rules — scoped to src/ only to avoid eslint-plugin-react v7 ──
+  // incompatibility with ESLint v10 (context.getFilename removed) on config files
+  {
+    files: ['src/**/*.{ts,tsx}'],
+
+    plugins: {
+      react: reactPlugin,
+      'react-hooks': reactHooks,
+    },
+
+    rules: {
+      ...reactPlugin.configs.recommended.rules,
+      ...reactHooks.configs.recommended.rules,
+      'react/react-in-jsx-scope': 'off', // React 17+ JSX transform
+      'react/prop-types': 'off',         // TypeScript handles prop types
+    },
+
+    settings: {
+      react: { version: '19' }, // hardcoded to avoid getFilename detection crash
     },
   },
 );
