@@ -1,75 +1,126 @@
-import { Link } from '@tanstack/react-router';
+import { Link, useRouterState } from '@tanstack/react-router';
 
 import { useAuthContext } from '#/context/AuthContext';
 
-import ThemeToggle from './ThemeToggle';
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good Morning ☀️';
+  if (h < 17) return 'Good Afternoon 🌤️';
+  return 'Good Evening 🌙';
+}
+
+function getInitials(name: string) {
+  return name
+    .split(' ')
+    .map((p) => p.charAt(0))
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+}
 
 const NAV_ITEMS = [
-  { label: '🏠 Home', to: '/' },
-  { label: '📋 Track', to: '/tracking' },
-  { label: '📊 Report', to: '/health-report' },
+  {
+    to: '/',
+    exact: true,
+    label: 'Home',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z"/>
+        <path d="M9 21V12h6v9"/>
+      </svg>
+    ),
+  },
+  {
+    to: '/tracking',
+    exact: false,
+    label: 'Tracking',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/>
+      </svg>
+    ),
+  },
+  {
+    to: '/health-report',
+    exact: false,
+    label: 'Health Report',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+        <rect x="9" y="3" width="6" height="4" rx="1"/>
+        <path d="M9 12h6M9 16h4"/>
+      </svg>
+    ),
+  },
 ] as const;
 
 export default function Header() {
   const { isAuthenticated, isLoading, user, logout, openAuthModal } = useAuthContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--header-bg)] px-4 backdrop-blur-lg">
-      <nav className="page-wrap flex flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-4">
-        {/* Brand */}
-        <h2 className="m-0 flex-shrink-0 text-base font-semibold tracking-tight">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm text-[var(--sea-ink)] no-underline shadow-[0_8px_24px_rgba(236,72,153,0.08)] sm:px-4 sm:py-2"
-          >
-            <span className="h-2 w-2 rounded-full bg-[linear-gradient(90deg,#ec4899,#f9a8d4)]" />
-            VivaFemini
-          </Link>
-        </h2>
+    <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--header-bg)] backdrop-blur-md">
+      <div className="page-wrap flex items-center gap-4 py-3 sm:py-3.5">
 
-        {/* Nav links */}
-        <div className="order-3 flex w-full flex-wrap items-center gap-x-4 gap-y-1 pb-1 text-sm font-semibold sm:order-none sm:w-auto sm:flex-nowrap sm:pb-0">
-          {NAV_ITEMS.map(({ label, to }) => (
-            <Link
-              key={to}
-              to={to}
-              className="nav-link"
-              activeProps={{ className: 'nav-link is-active' }}
-            >
-              {label}
-            </Link>
-          ))}
+        {/* Left — Avatar + greeting */}
+        <div className="flex flex-shrink-0 items-center gap-3">
+          {isAuthenticated && user ? (
+            <>
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-pink-400 to-pink-600 text-sm font-bold text-white shadow-sm">
+                {getInitials(user.fullName)}
+              </div>
+              <div className="hidden sm:block">
+                <p className="text-xs text-[var(--text-soft)]">{greeting()}</p>
+                <p className="text-sm font-bold text-[var(--text)] leading-tight">{user.fullName}</p>
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="text-base font-bold text-[var(--text)]">VivaFemini</span>
+            </div>
+          )}
         </div>
 
-        {/* Right side */}
-        <div className="ml-auto flex items-center gap-2">
-          <ThemeToggle />
+        {/* Center — pill navigation */}
+        <div className="flex flex-1 justify-center">
+          <nav className="pill-nav">
+            {NAV_ITEMS.map(({ to, exact, label, icon }) => {
+              const isActive = exact ? pathname === to : pathname.startsWith(to);
+              return (
+                <Link
+                  key={to}
+                  to={to}
+                  className={`pill-nav-item${isActive ? ' active' : ''}`}
+                >
+                  {icon}
+                  <span className="hidden sm:inline">{label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
 
-          {/* Auth controls */}
+        {/* Right — auth controls */}
+        <div className="flex flex-shrink-0 items-center gap-2">
           {!isLoading && (
             isAuthenticated ? (
-              <div className="flex items-center gap-2">
-                <span className="hidden max-w-[120px] truncate text-xs font-semibold text-[var(--sea-ink-soft)] sm:block">
-                  {user?.fullName}
-                </span>
-                <button
-                  onClick={logout}
-                  className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--sea-ink)] transition hover:bg-[var(--link-bg-hover)]"
-                >
-                  Sign out
-                </button>
-              </div>
+              <button
+                onClick={logout}
+                className="rounded-full border border-[var(--border-mid)] bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-[var(--text-soft)] transition hover:border-pink-300 hover:text-[var(--pink)]"
+              >
+                Sign out
+              </button>
             ) : (
               <button
                 onClick={openAuthModal}
-                className="rounded-full bg-pink-500 px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-pink-600"
+                className="rounded-full bg-[var(--pink)] px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[var(--pink-dark)]"
               >
                 Sign in
               </button>
             )
           )}
         </div>
-      </nav>
+      </div>
     </header>
   );
 }

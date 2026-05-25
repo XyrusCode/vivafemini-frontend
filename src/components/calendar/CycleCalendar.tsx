@@ -1,7 +1,7 @@
 import { useMemo, useState, type JSX } from 'react';
 
-import { isSameDay, todayIso } from '#/utils/date';
-import { getMonthMatrix } from '#/utils/date';
+import { isSameDay, todayIso, getMonthMatrix } from '#/utils/date';
+
 import type { CalendarDay, Cycle, CyclePrediction } from '#/types';
 
 interface CycleCalendarProps {
@@ -25,7 +25,7 @@ function buildDayMap(
       ? new Date(cycle.periodEndDate)
       : new Date(start.getTime() + 5 * 86_400_000);
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      map.set(d.toISOString().split('T')[0]!, 'period');
+      map.set(d.toISOString().split('T')[0], 'period');
     }
   }
 
@@ -33,15 +33,14 @@ function buildDayMap(
     const ovStart = new Date(prediction.ovulationStart);
     const ovEnd = new Date(prediction.ovulationEnd);
     for (let d = new Date(ovStart); d <= ovEnd; d.setDate(d.getDate() + 1)) {
-      const key = d.toISOString().split('T')[0]!;
+      const key = d.toISOString().split('T')[0];
       if (!map.has(key)) map.set(key, 'ovulation');
     }
-
     const nextPeriodStart = new Date(prediction.estimatedNextPeriod);
     for (let i = 0; i < 5; i++) {
       const d = new Date(nextPeriodStart);
       d.setDate(d.getDate() + i);
-      const key = d.toISOString().split('T')[0]!;
+      const key = d.toISOString().split('T')[0];
       if (!map.has(key)) map.set(key, 'predicted');
     }
   }
@@ -50,144 +49,150 @@ function buildDayMap(
   return map;
 }
 
-const dayDotStyles: Record<CalendarDay['type'], string> = {
-  normal: '',
-  ovulation: 'bg-blue-400',
-  period: 'bg-pink-500',
-  predicted: 'bg-pink-300',
-  today: 'bg-[var(--lagoon-deep)]',
+const dayCellCls: Record<CalendarDay['type'], string> = {
+  normal:    'text-white/80 hover:bg-white/20',
+  period:    'bg-white/30 text-white font-semibold',
+  ovulation: 'bg-purple-400/40 text-white font-semibold',
+  predicted: 'bg-pink-200/30 text-white/70',
+  today:     'bg-white text-pink-600 font-bold shadow-md',
 };
 
-const dayCellStyles: Record<CalendarDay['type'], string> = {
-  normal: 'hover:bg-[var(--link-bg-hover)]',
-  ovulation: 'bg-blue-100/60 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300',
-  period: 'bg-pink-100/70 dark:bg-pink-900/25 text-pink-700 dark:text-pink-300 font-semibold',
-  predicted: 'bg-pink-50 dark:bg-pink-900/10 text-pink-500',
-  today:
-    'ring-2 ring-[var(--lagoon-deep)] bg-[var(--lagoon-deep)]/10 font-bold text-[var(--lagoon-deep)]',
-};
+function cyclePhaseLabel(prediction: CyclePrediction | null, cycle: Cycle | null): string {
+  if (!cycle && !prediction) return 'No cycle tracked yet';
+  const today = todayIso();
+  if (!prediction) return 'Cycle active';
+  const ov1 = prediction.ovulationStart.split('T')[0];
+  const ov2 = prediction.ovulationEnd.split('T')[0];
+  if (today >= ov1 && today <= ov2) return 'Today is Fertile Day';
+  if (cycle) {
+    const ps = cycle.periodStartDate.split('T')[0];
+    const pe = cycle.periodEndDate?.split('T')[0] ?? '';
+    if (today >= ps && (!pe || today <= pe)) return 'Period Day';
+  }
+  return 'Cycle Tracking Active';
+}
 
-export function CycleCalendar({
-  cycle,
-  onDayClick,
-  prediction,
-}: CycleCalendarProps): JSX.Element {
+export function CycleCalendar({ cycle, onDayClick, prediction }: CycleCalendarProps): JSX.Element {
   const now = new Date();
   const [viewYear, setViewYear] = useState(now.getFullYear());
   const [viewMonth, setViewMonth] = useState(now.getMonth());
 
-  const matrix = useMemo(
-    () => getMonthMatrix(viewYear, viewMonth),
-    [viewYear, viewMonth],
-  );
+  const matrix = useMemo(() => getMonthMatrix(viewYear, viewMonth), [viewYear, viewMonth]);
+  const dayMap = useMemo(() => buildDayMap(cycle, prediction), [cycle, prediction]);
 
-  const dayMap = useMemo(
-    () => buildDayMap(cycle, prediction),
-    [cycle, prediction],
-  );
-
-  const monthLabel = new Date(viewYear, viewMonth).toLocaleDateString('en-US', {
-    month: 'long',
-    year: 'numeric',
-  });
+  const monthLabel = new Date(viewYear, viewMonth).toLocaleDateString('en-US', { month: 'long' });
+  const today = todayIso();
+  const todayNum = now.getDate();
 
   function prevMonth() {
-    if (viewMonth === 0) {
-      setViewYear((y) => y - 1);
-      setViewMonth(11);
-    } else {
-      setViewMonth((m) => m - 1);
-    }
+    if (viewMonth === 0) { setViewYear((y) => y - 1); setViewMonth(11); }
+    else setViewMonth((m) => m - 1);
+  }
+  function nextMonth() {
+    if (viewMonth === 11) { setViewYear((y) => y + 1); setViewMonth(0); }
+    else setViewMonth((m) => m + 1);
   }
 
-  function nextMonth() {
-    if (viewMonth === 11) {
-      setViewYear((y) => y + 1);
-      setViewMonth(0);
-    } else {
-      setViewMonth((m) => m + 1);
-    }
-  }
+  const phase = cyclePhaseLabel(prediction, cycle);
+  const cycleDay = cycle
+    ? Math.floor((now.getTime() - new Date(cycle.cycleStartDate).getTime()) / 86_400_000) + 1
+    : null;
 
   return (
-    <div className="island-shell rounded-2xl p-5">
-      {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
-        <span className="text-sm font-semibold text-[var(--sea-ink)]">
-          {monthLabel}
-        </span>
-        <div className="flex gap-1">
+    <div className="cal-card overflow-hidden">
+      {/* ── Calendar grid ── */}
+      <div className="px-5 pt-5 pb-4">
+        {/* Month header */}
+        <div className="mb-4 flex items-center justify-between">
           <button
             onClick={prevMonth}
-            className="rounded-lg p-1.5 text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)]"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/35"
             aria-label="Previous month"
           >
             ‹
           </button>
+          <span className="text-sm font-bold text-white">
+            Today, {monthLabel} ▾
+          </span>
           <button
             onClick={nextMonth}
-            className="rounded-lg p-1.5 text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)]"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/35"
             aria-label="Next month"
           >
             ›
           </button>
         </div>
-      </div>
 
-      {/* Day labels */}
-      <div className="mb-1 grid grid-cols-7 text-center">
-        {DAY_LABELS.map((d) => (
-          <span
-            key={d}
-            className="text-xs font-medium text-[var(--sea-ink-soft)]"
-          >
-            {d}
-          </span>
+        {/* Day labels */}
+        <div className="mb-2 grid grid-cols-7 text-center">
+          {DAY_LABELS.map((d) => (
+            <span key={d} className="text-xs font-semibold text-white/60">{d}</span>
+          ))}
+        </div>
+
+        {/* Weeks */}
+        {matrix.map((week, wi) => (
+          <div key={wi} className="grid grid-cols-7 gap-y-0.5">
+            {week.map((day, di) => {
+              if (!day) return <div key={di} className="h-9" />;
+              const iso = day.toISOString().split('T')[0];
+              const type: CalendarDay['type'] = isSameDay(iso, today)
+                ? 'today'
+                : (dayMap.get(iso) ?? 'normal');
+              return (
+                <button
+                  key={iso}
+                  onClick={() => onDayClick?.(iso)}
+                  className={[
+                    'mx-auto flex h-9 w-9 items-center justify-center rounded-full text-sm transition',
+                    dayCellCls[type],
+                  ].join(' ')}
+                >
+                  {day.getDate()}
+                </button>
+              );
+            })}
+          </div>
         ))}
       </div>
 
-      {/* Weeks */}
-      {matrix.map((week, wi) => (
-        <div key={wi} className="grid grid-cols-7 gap-0.5">
-          {week.map((day, di) => {
-            if (!day) return <div key={di} />;
-            const iso = day.toISOString().split('T')[0]!;
-            const today = todayIso();
-            const type: CalendarDay['type'] = isSameDay(iso, today)
-              ? 'today'
-              : (dayMap.get(iso) ?? 'normal');
-            return (
-              <button
-                key={iso}
-                onClick={() => onDayClick?.(iso)}
-                className={[
-                  'relative flex h-9 w-full items-center justify-center rounded-xl text-sm transition',
-                  dayCellStyles[type],
-                ].join(' ')}
-              >
-                {day.getDate()}
-                {dayMap.has(iso) && type !== 'today' && (
-                  <span
-                    className={`absolute bottom-1 h-1 w-1 rounded-full ${dayDotStyles[type]}`}
-                  />
-                )}
-              </button>
-            );
-          })}
+      {/* ── Day spotlight ── */}
+      <div className="border-t border-white/20 bg-white/10 px-5 py-4">
+        <div className="flex items-center gap-5">
+          {/* Concentric ring display */}
+          <div className="relative flex-shrink-0">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/30">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-white/50 bg-white shadow-md">
+                <span className="text-xl font-black text-pink-500">{todayNum}</span>
+              </div>
+            </div>
+          </div>
+          {/* Stats */}
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-white">{phase}</p>
+            {cycleDay !== null && (
+              <p className="text-xs text-white/70">
+                Day Cycle: <span className="font-semibold text-white">{cycleDay} Days</span>
+              </p>
+            )}
+            {prediction && (
+              <p className="text-xs text-white/70">
+                Avg Cycle: <span className="font-semibold text-white">{prediction.averageCycleLength} Days</span>
+              </p>
+            )}
+          </div>
         </div>
-      ))}
+      </div>
 
-      {/* Legend */}
-      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5">
-        {(
-          [
-            ['period', 'Period', 'bg-pink-500'],
-            ['ovulation', 'Ovulation', 'bg-blue-400'],
-            ['predicted', 'Predicted', 'bg-pink-300'],
-            ['today', 'Today', 'bg-[var(--lagoon-deep)]'],
-          ] as const
-        ).map(([, label, dot]) => (
-          <span key={label} className="flex items-center gap-1.5 text-xs text-[var(--sea-ink-soft)]">
+      {/* ── Legend ── */}
+      <div className="flex flex-wrap gap-x-4 gap-y-1 bg-white/5 px-5 py-3">
+        {([
+          ['period',    'Period',    'bg-white/40'],
+          ['ovulation', 'Ovulation', 'bg-purple-400/60'],
+          ['predicted', 'Predicted', 'bg-pink-200/50'],
+          ['today',     'Today',     'bg-white'],
+        ] as const).map(([, label, dot]) => (
+          <span key={label} className="flex items-center gap-1.5 text-xs text-white/70">
             <span className={`h-2 w-2 rounded-full ${dot}`} />
             {label}
           </span>
