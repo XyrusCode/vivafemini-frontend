@@ -1,0 +1,11 @@
+#!/bin/sh
+# Enforce conventional commits: type(scope): description
+commit_msg=$(cat "$1")
+pattern='^(feat|fix|chore|docs|style|refactor|test|ci|perf|build|revert)(\(.+\))?: .{1,100}$'
+if ! echo "$commit_msg" | grep -Eq "$pattern"; then
+  echo "❌ Invalid commit message format."
+  echo "   Expected: type(scope): description"
+  echo "   Types: feat|fix|chore|docs|style|refactor|test|ci|perf|build|revert"
+  echo "   Example: feat(tracking): add symptom picker component"
+  exit 1
+fi
