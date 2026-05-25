@@ -8,7 +8,25 @@ import { formatShortDate } from '#/utils/date';
 
 import type { JSX } from 'react';
 
-export const Route = createFileRoute('/')({ component: HomePage });
+export const Route = createFileRoute('/')({
+  component: HomePage,
+  head: () => ({
+    meta: [
+      { title: 'VivaFemini — Your Cycle Dashboard' },
+      {
+        name: 'description',
+        content:
+          'View your cycle calendar, upcoming ovulation and period predictions, wellness tips, and daily check-ins.',
+      },
+      { property: 'og:title', content: 'VivaFemini — Your Cycle Dashboard' },
+      {
+        property: 'og:description',
+        content: 'View your cycle calendar, upcoming predictions, and personalized wellness tips.',
+      },
+      { property: 'og:url', content: 'https://vivafemini-frontend.vercel.app/' },
+    ],
+  }),
+});
 
 /* ── Static wellness tips ─────────────────────────────────────────────────── */
 const TIPS = [
@@ -71,7 +89,7 @@ function HomePage(): JSX.Element {
 
   return (
     <main className="page-wrap px-4 pb-12 pt-6">
-      <div className="flex gap-6 lg:items-start">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
 
         {/* ── LEFT COLUMN ─────────────────────────────────────────────────── */}
         <div className="w-full space-y-4 lg:w-[380px] lg:flex-shrink-0">
@@ -274,7 +292,7 @@ function HomePage(): JSX.Element {
 
         {/* Mobile: no cycle data = CTA */}
         {!isAuthenticated && (
-          <div className="mt-4 block w-full rounded-2xl border border-[var(--border-mid)] bg-[var(--surface)] p-6 text-center lg:hidden">
+          <div className="w-full rounded-2xl border border-[var(--border-mid)] bg-[var(--surface)] p-6 text-center lg:hidden">
             <span className="text-3xl">🌸</span>
             <h3 className="mt-2 font-bold text-[var(--text)]">Start tracking your cycle</h3>
             <p className="mt-1 text-xs text-[var(--text-xsoft)]">
@@ -290,7 +308,7 @@ function HomePage(): JSX.Element {
         )}
 
         {isAuthenticated && !cycle && !isLoading && (
-          <div className="mt-4 block w-full rounded-2xl border border-[var(--border-mid)] bg-[var(--surface)] p-6 text-center lg:hidden">
+          <div className="w-full rounded-2xl border border-[var(--border-mid)] bg-[var(--surface)] p-6 text-center lg:hidden">
             <span className="text-3xl">🌸</span>
             <h3 className="mt-2 font-bold text-[var(--text)]">Start tracking your cycle</h3>
             <p className="mt-1 text-xs text-[var(--text-xsoft)]">

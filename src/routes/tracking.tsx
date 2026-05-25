@@ -8,7 +8,25 @@ import { useSymptoms } from '#/hooks/useSymptoms';
 import { useTracking } from '#/hooks/useTracking';
 import { todayIso } from '#/utils/date';
 
-export const Route = createFileRoute('/tracking')({ component: TrackingPage });
+export const Route = createFileRoute('/tracking')({
+  component: TrackingPage,
+  head: () => ({
+    meta: [
+      { title: 'Log Symptoms — VivaFemini' },
+      {
+        name: 'description',
+        content:
+          'Log your daily symptoms, flow intensity, and notes to track your menstrual health over time.',
+      },
+      { property: 'og:title', content: 'Log Symptoms — VivaFemini' },
+      {
+        property: 'og:description',
+        content: 'Log daily symptoms, flow intensity, and notes to understand your cycle patterns.',
+      },
+      { property: 'og:url', content: 'https://vivafemini-frontend.vercel.app/tracking' },
+    ],
+  }),
+});
 
 /* Illustration made from Lucide-style paths */
 function TrackingIllustration(): JSX.Element {
@@ -88,7 +106,7 @@ function TrackingPage(): JSX.Element {
 
   return (
     <main className="page-wrap px-4 pb-12 pt-6">
-      <div className="flex gap-6 lg:items-start">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
         {/* ── LEFT PANEL ─────────────────────────────────────────────────── */}
         <div className="hidden w-[340px] flex-shrink-0 space-y-4 lg:block">
           {/* Illustration card */}

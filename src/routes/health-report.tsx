@@ -14,7 +14,25 @@ import type {
   SymptomFrequency,
 } from '#/types';
 
-export const Route = createFileRoute('/health-report')({ component: HealthReportPage });
+export const Route = createFileRoute('/health-report')({
+  component: HealthReportPage,
+  head: () => ({
+    meta: [
+      { title: 'Health Report — VivaFemini' },
+      {
+        name: 'description',
+        content:
+          'View your cycle analytics: period length trends, symptom frequency breakdown, and historical cycle data.',
+      },
+      { property: 'og:title', content: 'Health Report — VivaFemini' },
+      {
+        property: 'og:description',
+        content: 'Cycle analytics, symptom frequency breakdown, and historical period data.',
+      },
+      { property: 'og:url', content: 'https://vivafemini-frontend.vercel.app/health-report' },
+    ],
+  }),
+});
 
 /* ── Stat pill ─────────────────────────────────────────────────────────────── */
 interface StatPillProps { icon: string; label: string; value: string; color?: string }
@@ -94,7 +112,7 @@ function HealthReportPage(): JSX.Element {
   return (
     <main className="page-wrap px-4 pb-12 pt-6">
       {/* ── Page header ── */}
-      <div className="mb-6 flex items-start justify-between">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-[var(--text)]">
             Cycle Summary{report ? ` – ${report.monthYear}` : ''}
