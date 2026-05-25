@@ -32,33 +32,7 @@
   --shadow-pop:   0 8px 32px rgba(236,72,153,0.16), 0 2px 8px rgba(0,0,0,0.06);
 }
 
-/* Dark mode — explicit theme attribute */
-:root[data-theme="dark"] {
-  --text:        #F9FAFB;
-  --text-soft:   #9CA3AF;
-  --text-xsoft:  #6B7280;
-  --bg:          #111827;
-  --surface:     #1F2937;
-  --border:      #374151;
-  --border-mid:  #4B5563;
-  --header-bg:   rgba(17, 24, 39, 0.96);
-  --shadow-card: 0 2px 16px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04);
-}
-
-/* Dark mode — system preference, unless explicitly set to light */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --text:        #F9FAFB;
-    --text-soft:   #9CA3AF;
-    --text-xsoft:  #6B7280;
-    --bg:          #111827;
-    --surface:     #1F2937;
-    --border:      #374151;
-    --border-mid:  #4B5563;
-    --header-bg:   rgba(17, 24, 39, 0.96);
-    --shadow-card: 0 2px 16px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04);
-  }
-}
+/* Dark mode intentionally omitted — light-only design */
 
 /* ── Reset / base ──────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
