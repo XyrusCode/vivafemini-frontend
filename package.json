@@ -13,7 +13,9 @@
     "start": "node .vercel/output/functions/index.func/index.mjs",
     "lint": "eslint src --fix",
     "lint:check": "eslint src",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "node scripts/canary.mjs",
+    "postbuild": "node scripts/canary.mjs"
   },
   "dependencies": {
     "@sentry/tanstackstart-react": "^10.42.0",
