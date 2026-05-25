@@ -85,7 +85,7 @@ const ARTICLES = [
 
 function HomePage(): JSX.Element {
   const { isAuthenticated, openAuthModal } = useAuthContext();
-  const { cycle, isLoading, prediction } = useCycle();
+  const { cycle, isLoading, prediction, error } = useCycle();
 
   return (
     <main className="page-wrap px-4 pb-12 pt-6">
@@ -98,6 +98,10 @@ function HomePage(): JSX.Element {
           {isLoading ? (
             <div className="cal-card flex h-64 items-center justify-center">
               <p className="text-sm text-white/70">Loading…</p>
+            </div>
+          ) : error ? (
+            <div className="cal-card flex h-64 items-center justify-center px-6 text-center">
+              <p className="text-sm text-white/70">Could not load cycle data. Please refresh.</p>
             </div>
           ) : (
             <CycleCalendar cycle={cycle} prediction={prediction} />

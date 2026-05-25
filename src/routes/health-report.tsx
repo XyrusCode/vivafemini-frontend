@@ -54,6 +54,7 @@ function HealthReportPage(): JSX.Element {
   const [history, setHistory] = useState<HistoricalEntry[]>([]);
   // Start loading only if a token exists; avoids synchronous setState in the effect
   const [isLoading, setIsLoading] = useState(() => !!localStorage.getItem('access_token'));
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
@@ -70,6 +71,9 @@ function HealthReportPage(): JSX.Element {
       setTrends(t);
       setSymptoms(s);
       setHistory(h);
+      setIsLoading(false);
+    }).catch(() => {
+      setLoadError('Could not load your health report. Please refresh.');
       setIsLoading(false);
     });
   }, []);
@@ -97,6 +101,14 @@ function HealthReportPage(): JSX.Element {
         >
           Sign in to view report
         </button>
+      </main>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <main className="page-wrap flex h-[60vh] items-center justify-center px-4">
+        <p className="text-sm text-red-500">{loadError}</p>
       </main>
     );
   }

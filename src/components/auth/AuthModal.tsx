@@ -74,32 +74,32 @@ export function AuthModal({
   }
 
   const inputCls =
-    'w-full rounded-xl border border-[var(--line)] bg-[var(--surface)] px-4 py-2.5 text-sm text-[var(--sea-ink)] placeholder:text-[var(--sea-ink-soft)] focus:outline-none focus:ring-2 focus:ring-[var(--lagoon)] transition';
+    'w-full rounded-xl border border-[var(--border-mid)] bg-[var(--surface)] px-4 py-2.5 text-sm text-[var(--text)] placeholder:text-[var(--text-xsoft)] focus:outline-none focus:ring-2 focus:ring-[var(--pink)] focus:border-[var(--pink)] transition';
 
   return (
     /* Backdrop */
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}
+      style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       {/* Card */}
       <div
-        className="island-shell w-full max-w-sm rounded-2xl p-6"
+        className="card w-full max-w-sm rounded-2xl bg-[var(--surface)] p-6"
         role="dialog"
         aria-modal="true"
         aria-label={tab === 'login' ? 'Sign in' : 'Create account'}
       >
         {/* Brand */}
         <div className="mb-5 flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-[linear-gradient(90deg,#ec4899,#f9a8d4)]" />
-          <span className="text-sm font-bold tracking-tight text-[var(--sea-ink)]">VivaFemini</span>
+          <span className="h-2.5 w-2.5 rounded-full bg-[var(--pink)]" />
+          <span className="text-sm font-bold tracking-tight text-[var(--text)]">VivaFemini</span>
         </div>
 
         {/* Tabs */}
-        <div className="mb-6 flex rounded-xl border border-[var(--line)] p-0.5">
+        <div className="mb-6 flex rounded-xl border border-[var(--border-mid)] bg-[var(--bg)] p-0.5">
           {(['login', 'register'] as const).map((t) => (
             <button
               key={t}
@@ -107,8 +107,8 @@ export function AuthModal({
               className={[
                 'flex-1 rounded-[10px] py-2 text-sm font-semibold transition',
                 tab === t
-                  ? 'bg-[var(--surface-strong)] text-[var(--sea-ink)] shadow-sm'
-                  : 'text-[var(--sea-ink-soft)] hover:text-[var(--sea-ink)]',
+                  ? 'bg-[var(--surface)] text-[var(--text)] shadow-sm'
+                  : 'text-[var(--text-soft)] hover:text-[var(--text)]',
               ].join(' ')}
             >
               {t === 'login' ? 'Sign in' : 'Create account'}
@@ -118,7 +118,7 @@ export function AuthModal({
 
         {/* Error banner */}
         {error && (
-          <div className="mb-4 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-400">
+          <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
             {error}
           </div>
         )}
@@ -127,7 +127,7 @@ export function AuthModal({
         {tab === 'login' && (
           <form onSubmit={(e) => void handleLogin(e)} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-[var(--sea-ink-soft)]" htmlFor="login-email">
+              <label className="text-xs font-semibold text-[var(--text-soft)]" htmlFor="login-email">
                 Email
               </label>
               <input
@@ -142,7 +142,7 @@ export function AuthModal({
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-[var(--sea-ink-soft)]" htmlFor="login-password">
+              <label className="text-xs font-semibold text-[var(--text-soft)]" htmlFor="login-password">
                 Password
               </label>
               <input
@@ -156,15 +156,15 @@ export function AuthModal({
                 className={inputCls}
               />
             </div>
-            <Button type="submit" isLoading={isSubmitting} className="mt-1 w-full rounded-full bg-pink-500 hover:bg-pink-600 focus-visible:ring-pink-500">
+            <Button type="submit" isLoading={isSubmitting} className="mt-1 w-full rounded-full bg-[var(--pink)] hover:bg-[var(--pink-dark)] focus-visible:ring-[var(--pink)]">
               Sign in
             </Button>
-            <p className="text-center text-xs text-[var(--sea-ink-soft)]">
+            <p className="text-center text-xs text-[var(--text-soft)]">
               No account?{' '}
               <button
                 type="button"
                 onClick={() => { setTab('register'); setError(null); }}
-                className="font-semibold text-[var(--lagoon-deep)] underline-offset-2 hover:underline"
+                className="font-semibold text-[var(--pink)] underline-offset-2 hover:underline"
               >
                 Create one
               </button>
@@ -176,7 +176,7 @@ export function AuthModal({
         {tab === 'register' && (
           <form onSubmit={(e) => void handleRegister(e)} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-[var(--sea-ink-soft)]" htmlFor="reg-name">
+              <label className="text-xs font-semibold text-[var(--text-soft)]" htmlFor="reg-name">
                 Full name
               </label>
               <input
@@ -192,7 +192,7 @@ export function AuthModal({
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-[var(--sea-ink-soft)]" htmlFor="reg-email">
+              <label className="text-xs font-semibold text-[var(--text-soft)]" htmlFor="reg-email">
                 Email
               </label>
               <input
@@ -206,7 +206,7 @@ export function AuthModal({
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-[var(--sea-ink-soft)]" htmlFor="reg-password">
+              <label className="text-xs font-semibold text-[var(--text-soft)]" htmlFor="reg-password">
                 Password <span className="font-normal opacity-70">(min 8 chars)</span>
               </label>
               <input
@@ -220,15 +220,15 @@ export function AuthModal({
                 className={inputCls}
               />
             </div>
-            <Button type="submit" isLoading={isSubmitting} className="mt-1 w-full rounded-full bg-pink-500 hover:bg-pink-600 focus-visible:ring-pink-500">
+            <Button type="submit" isLoading={isSubmitting} className="mt-1 w-full rounded-full bg-[var(--pink)] hover:bg-[var(--pink-dark)] focus-visible:ring-[var(--pink)]">
               Create account
             </Button>
-            <p className="text-center text-xs text-[var(--sea-ink-soft)]">
+            <p className="text-center text-xs text-[var(--text-soft)]">
               Already have an account?{' '}
               <button
                 type="button"
                 onClick={() => { setTab('login'); setError(null); }}
-                className="font-semibold text-[var(--lagoon-deep)] underline-offset-2 hover:underline"
+                className="font-semibold text-[var(--pink)] underline-offset-2 hover:underline"
               >
                 Sign in
               </button>

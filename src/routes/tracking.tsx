@@ -75,7 +75,7 @@ function TrackingIllustration(): JSX.Element {
 function TrackingPage(): JSX.Element {
   const { isAuthenticated, openAuthModal } = useAuthContext();
   const today = todayIso();
-  const { grouped, categoryLabels, isLoading: symptomsLoading } = useSymptoms();
+  const { grouped, categoryLabels, isLoading: symptomsLoading, error: symptomsError } = useSymptoms();
   const { save, isSaving } = useTracking(today);
 
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
@@ -137,6 +137,10 @@ function TrackingPage(): JSX.Element {
           {symptomsLoading ? (
             <div className="card flex h-32 items-center justify-center">
               <p className="text-sm text-[var(--text-soft)]">Loading symptoms…</p>
+            </div>
+          ) : symptomsError ? (
+            <div className="card flex h-32 items-center justify-center px-5 text-center">
+              <p className="text-sm text-red-500">Could not load symptoms. Please refresh.</p>
             </div>
           ) : (
             <>

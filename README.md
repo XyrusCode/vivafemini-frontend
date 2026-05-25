@@ -61,7 +61,6 @@ pnpm dev          # Dev server
 pnpm build        # Production build
 pnpm lint         # Lint + auto-fix
 pnpm lint:check   # Lint check (CI)
-pnpm test         # Unit tests
 ```
 
 ## Code Quality
@@ -72,4 +71,4 @@ pnpm test         # Unit tests
 
 ## Deployment
 
-Deployed on **Vercel** (TanStack Start + Cloudflare adapter). See `vercel.json`.
+Deployed on **Vercel** via a custom SSR serverless function (`api/ssr.js`). See `vercel.json`.
